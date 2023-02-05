@@ -1,0 +1,68 @@
+initialize() {
+
+	if (exists("slimgui")) {
+ defineConstant("dom", 1.0);
+//see how 0.5 works
+ defineConstant("select", 0.01);
+ defineConstant("seed",1);
+
+ } 
+ 	setSeed(seed);
+	initializeMutationRate(1e-8);
+	initializeMutationType("m1", 0.5, "f", 0.0);         // non-coding
+	initializeMutationType("m2", 0.5, "f", 0.0);         // synonymous neutral
+	initializeMutationType("m3", 0.5, "g", -0.03, 0.2);  // deleterious
+	initializeMutationType("m4", 0.5, "e", 0.1);         // beneficial
+	initializeMutationType("m5", 0.5, "g", -8.1, 0.0415); // synonymous delet
+	
+	//make all neutral but add m2 back in 
+	initializeGenomicElementType("g1", c(m1,m2), 0.7, 0.3);  // exon
+	initializeGenomicElementType("g2", c(m1), 1);       // intron w only neutral sites
+	initializeGenomicElementType("g3", c(m1), 1);           // non-coding region with only neutral sites
+	
+	// Generate random genes along an approximately 100000-base chromosome
+	base = 0;
+	//million base pairs
+	//10 kB base pairs maybe be better
+	while (base < 100) {
+		// make a non-coding region
+		nc_length = rdunif(1, 100, 5000);
+		initializeGenomicElement(g3, base, base + nc_length - 1);
+		base = base + nc_length;
+		
+		// make first exon
+		ex_length = asInteger(rlnorm(1, log(50), log(2))) + 1;
+		initializeGenomicElement(g1, base, base + ex_length - 1);
+		base = base + ex_length;
+		
+		// make additional intron-exon pairs
+		do  {
+			in_length = asInteger(rlnorm(1, log(100), log(1.5))) + 10;
+			initializeGenomicElement(g2, base, base + in_length - 1);
+			base = base + in_length;
+			
+			ex_length = asInteger(rlnorm(1, log(50), log(2))) + 1;
+			initializeGenomicElement(g1, base, base + ex_length - 1);
+			base = base + ex_length;
+		}
+		while (runif(1) < 0.8);  // 20% probability of stopping
+//		cat("Number of bases = " + base + "\n");
+	}
+		
+	// final non-coding region
+	nc_length = rdunif(1, 100, 5000);
+	initializeGenomicElement(g3, base, base + nc_length - 1);
+	//cat("Number of bases = " + base + "\n");
+	// single recombination rate
+	initializeRecombinationRate(0.5);
+	}
+	// 1000 population
+	1 { sim.addSubpop("p1", 1000); }	
+ 
+
+14000 late() {
+	p1.outputSample(100);
+	
+	
+}
+
