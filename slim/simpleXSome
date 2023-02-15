@@ -1,13 +1,19 @@
-initialize() {
 
-	if (exists("slimgui")) {
- defineConstant("dom", 1.0);
-//see how 0.5 works
+initialize() {
+if (exists("slimgui")) {
+//defining dominance coefficent
+defineConstant("dom", 1.0);
+
+//defining selection coefficent
  defineConstant("select", 0.01);
+ 
+//setting (random) seed to constant 1
  defineConstant("seed",1);
 
  } 
  	setSeed(seed);
+	
+	//intializing mutation rates and mutuation types
 	initializeMutationRate(1e-8);
 	initializeMutationType("m1", 0.5, "f", 0.0);         // non-coding
 	initializeMutationType("m2", 0.5, "f", 0.0);         // synonymous neutral
@@ -20,10 +26,8 @@ initialize() {
 	initializeGenomicElementType("g2", c(m1), 1);       // intron w only neutral sites
 	initializeGenomicElementType("g3", c(m1), 1);           // non-coding region with only neutral sites
 	
-	// Generate random genes along an approximately 100000-base chromosome
+	// Generate random genes along an approximately 100-base chromosome
 	base = 0;
-	//million base pairs
-	//10 kB base pairs maybe be better
 	while (base < 100) {
 		// make a non-coding region
 		nc_length = rdunif(1, 100, 5000);
@@ -45,24 +49,24 @@ initialize() {
 			initializeGenomicElement(g1, base, base + ex_length - 1);
 			base = base + ex_length;
 		}
+		
 		while (runif(1) < 0.8);  // 20% probability of stopping
-//		cat("Number of bases = " + base + "\n");
 	}
 		
 	// final non-coding region
 	nc_length = rdunif(1, 100, 5000);
 	initializeGenomicElement(g3, base, base + nc_length - 1);
-	//cat("Number of bases = " + base + "\n");
-	// single recombination rate
+	
+	//single recombination rate
 	initializeRecombinationRate(0.5);
 	}
-	// 1000 population
+	
+	// Define 1000 population in first generation
 	1 { sim.addSubpop("p1", 1000); }	
  
 
 14000 late() {
+//output sample 100 after 14000 generations
 	p1.outputSample(100);
-	
-	
 }
 
