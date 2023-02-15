@@ -1,0 +1,63 @@
+initialize() {
+
+	if (exists("slimgui")) {
+ defineConstant("dom", 1.0);
+ defineConstant("select", 0.01);
+ defineConstant("seed",1);
+
+ } 
+ 	//setSeed(seed);
+	initializeMutationRate(1e-8);
+	initializeMutationType("m1", 0.5, "f", 0.0);         // non-coding
+	initializeMutationType("m2", 0.5, "f", 0.0);         // synonymous neutral
+	initializeMutationType("m3", 0.5, "g", -0.03, 0.2);  // deleterious
+	initializeMutationType("m4", 0.5, "e", 0.1);         // beneficial
+	initializeMutationType("m5", 0.5, "g", -8.1, 0.0415); // synonymous delet
+	
+	initializeGenomicElementType("g1", c(m2,m3,m4,m5), c(1.41,8,0.1, 0.59));  // exon
+	initializeGenomicElementType("g2", c(m1,m3), c(9,1));       // intron
+	initializeGenomicElementType("g3", c(m1), 1);           // non-coding
+	
+	// Generate random genes along an approximately 100000-base chromosome
+	base = 0;
+	//million base pairs
+	while (base < 1000000) {
+		// make a non-coding region
+		nc_length = rdunif(1, 100, 5000);
+		initializeGenomicElement(g3, base, base + nc_length - 1);
+		base = base + nc_length;
+		
+		// make first exon
+		ex_length = asInteger(rlnorm(1, log(50), log(2))) + 1;
+		initializeGenomicElement(g1, base, base + ex_length - 1);
+		base = base + ex_length;
+		
+		// make additional intron-exon pairs
+		do  {
+			in_length = asInteger(rlnorm(1, log(100), log(1.5))) + 10;
+			initializeGenomicElement(g2, base, base + in_length - 1);
+			base = base + in_length;
+			
+			ex_length = asInteger(rlnorm(1, log(50), log(2))) + 1;
+			initializeGenomicElement(g1, base, base + ex_length - 1);
+			base = base + ex_length;
+		}
+		while (runif(1) < 0.8);  // 20% probability of stopping
+//		cat("Number of bases = " + base + "\n");
+	}
+		
+	// final non-coding region
+	nc_length = rdunif(1, 100, 5000);
+	initializeGenomicElement(g3, base, base + nc_length - 1);
+	//cat("Number of bases = " + base + "\n");
+	// single recombination rate
+	initializeRecombinationRate(1e-8);
+	}
+	1 { sim.addSubpop("p1", 1000); }	
+ 
+
+14000 late() {
+ 	p1.outputSample(100);
+	//sim.outputFull("~/trial_1_syn_sites_model_output" + seed + ".txt");
+	
+}
