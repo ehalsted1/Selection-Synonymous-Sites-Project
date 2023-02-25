@@ -1,0 +1,2 @@
+//termnial code to create multiple reptitions of slim simulation where
+for i in `seq 1 100`; do slim -seed $i  TrialX.slim > "Input/sample"$i".txt"; done
